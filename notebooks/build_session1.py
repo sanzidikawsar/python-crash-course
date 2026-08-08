@@ -507,11 +507,13 @@ md(
     "number each → collect into a list*:"
 )
 code(
+    "import warnings\n"
+    'warnings.filterwarnings("ignore")\n'
     "universe = mda.Universe(PSF, DCD)\n"
     'protein = universe.select_atoms("protein")\n'
     "sizes = []\n"
     "for frame in universe.trajectory:\n"
-    "    sizes.append(round(protein.radius_of_gyration(), 2))\n"
+    "    sizes.append(round(float(protein.radius_of_gyration()), 2))\n"
     'print("measured", len(sizes), "frames; first 5 sizes:", sizes[:5])',
     role="run", hint="molecular dynamics — protein size per frame",
 )

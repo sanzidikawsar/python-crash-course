@@ -116,21 +116,31 @@ session 1. Most common blocker: virtualization disabled in BIOS — warn in adva
 
 ## 5. Session 1 — "Make the computer do your boring work" (90 min)
 
-One continuous story: messy files → cleaned → summarized → plotted. Concepts
-appear only when the story needs them, never as a taxonomy. There is no
-"data types" section and no "control flow" section.
+Built bottom-up for a genuinely zero-programming group: the five Python
+building blocks first, on everyday values, then their data, then their field's
+tool. Concepts still appear only as the story needs them — no "data types" or
+"control flow" taxonomy — but the sequence is **fundamentals-first, not
+hook-first**.
 
-| Time | Block | Content |
+**Why not open with the "wow" hook?** The original design opened with an opaque
+six-line demo ("watch this replace 30 minutes of Excel"). That motivates
+learners who can tolerate not-understanding; for a truly zero-experience group
+it intimidates. The impressive combined result now lands at the *end of Part 3*
+as the payoff they can actually build. (Instructor's call for this cohort; if a
+future group is more confident, restore a 30-second run-only teaser on top.)
+
+| Time | Part | Content |
 |---|---|---|
-| 0–10 | **The hook** | Take a task that costs 30 minutes in Excel. Do it in six lines, live. This is the entire argument for the course — spend the time. |
-| 10–25 | **Notebook mechanics** | Cells, run order, what a variable is. **Trigger an error deliberately and fix it here**, in the first 15 minutes. Fear removal cannot wait until the end. |
-| 25–50 | **Data in** | `read_csv`, `.head()`, `.shape`, `.describe()`, selecting columns, filtering rows. This is 80% of everything they will ever do. |
-| 50–70 | **Repeating yourself** | `for` loop over the 12 files; `groupby` as the loop you don't have to write. |
-| 70–85 | **One plot** | matplotlib, labels, title, saved as a PNG that could go in a paper. |
-| 85–90 | **Homework brief** | HW0 verification + HW1 handed out. |
+| 0–15 | **Part 1 · Python basics** | `print`, variable, string ops (`.strip`/`.capitalize`), one `if`, list + `.append`, one `for` — all on everyday values (fruit, temperature, a name). First **break-it-on-purpose** here. |
+| 15–40 | **Part 2 · Your first real file** | A taste of lab data (a list of readings, a messy label), then one CSV: `read_csv`, DataFrame, `.head/.shape/.dtypes/.describe`, select, filter, second **break-it**, the three one-line cleanings (reusing Part 1's string ops). |
+| 40–65 | **Part 3 · All the files at once** | The 3-step loop build (3 files → month list → full combine), `groupby`, one line plot + save, one bar chart. The old "hook", now earned. |
+| 65–80 | **Part 4 · A taste of your field's tool** | Same five-step skeleton in Biopython (GC per sequence) and MDAnalysis (radius per frame). Run-only confidence taste; hands-on deferred to session 2. |
+| 80–90 | **Wrap up** | Recap + HW1 handed out. |
 
-Concepts permitted: variable, string, number, list, indexing, one `if`, one
-`for`, DataFrame, column, filter, `groupby`, one plot. Nothing else.
+Concepts permitted: variable, string, string methods, number, list, `.append`,
+`len`, `max`, one `if`, one `for`, DataFrame, column, filter, `groupby`, one
+plot. Nothing else. String operations are taught in Part 1 specifically so the
+Part 2 cleaning step reuses them.
 
 ---
 

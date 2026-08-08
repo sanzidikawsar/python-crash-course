@@ -71,8 +71,11 @@ These are non-negotiable and are the most common thing to get wrong.
    …" list and a "what to try in the homework" list.
 10. **Data loads from a URL constant** defined once at the top for session 1.
     Local file paths are introduced deliberately in session 2, as a topic.
-11. **Colab notebooks get exactly one install cell at the top**, pinned
-    versions, with a comment saying it is Colab-only. Local notebooks get none.
+11. **Colab notebooks get one core install cell at the top** (pinned versions,
+    Colab-only comment). A *second* install cell may appear once at the start of
+    a later section that needs heavier domain libraries (e.g. Biopython +
+    MDAnalysis in session 1 Part 4), so class start-up stays fast. Local
+    notebooks get none.
 
 ## Definition of done for a notebook
 
@@ -117,7 +120,11 @@ Notebooks define this once at the top and build file URLs from it, e.g.
 ## Environment decisions (rationale in docs/course-design.md)
 
 - **Session 1: Google Colab.** Zero install, identical environment on every
-  laptop, data fetched by URL.
+  laptop, data fetched by URL. Fundamentals-first (Python basics → one CSV →
+  all files → a run-only taste of Biopython + MDAnalysis in Part 4). The MD
+  taste uses the bundled `PSF`/`DCD` test files — verified working (3341 atoms,
+  98 frames). Session 1 is built from one source: `notebooks/build_session1.py`
+  emits both `01_live.ipynb` and `01_complete.ipynb`.
 - **Between sessions: local Miniforge + Jupyter**, installed as homework, not
   in class. Prefer Miniforge over full Anaconda (smaller, conda-forge default,
   avoids institutional licensing questions).

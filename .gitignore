@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Obsidian (personal vault config — not course content)
+.obsidian/
+.trash/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini

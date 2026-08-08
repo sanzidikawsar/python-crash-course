@@ -134,7 +134,12 @@ code(
     hint="list the 12 months, read each file, stack them into one table `year`",
 )
 
-md("Here are the first rows of the whole year in one glance:")
+md(
+    "Here are the first rows of the whole year in one glance. That table has a "
+    "name: a **DataFrame** — Python's version of a spreadsheet. We will get to "
+    "know it properly in a few minutes; for now just notice it is rows and "
+    "columns, exactly like Excel."
+)
 code("year.head()", role="wedo", hint="peek at the top of the combined table")
 
 md(
@@ -245,10 +250,11 @@ code("print(plate_wells)", role="wedo", hint="spell the variable name correctly"
 md(
     "## Getting data in\n"
     "\n"
-    "This block is roughly 80% of everything you will ever do with data. We load "
-    "**one** file first, so we can look at it slowly. `pd.read_csv(...)` reads a "
-    "CSV file into a **DataFrame** — think of it as one sheet of a spreadsheet "
-    "that Python can work on.",
+    "This block is roughly 80% of everything you will ever do with data. First, "
+    "properly: a **DataFrame** is just a table — rows and columns, like an Excel "
+    "sheet. Each column behaves like the lists you met earlier, only with a "
+    "name. `pd.read_csv(...)` loads one CSV file into a DataFrame; we load "
+    "**one** file first, so we can look at it slowly.",
     section="Getting data in", minutes=25,
 )
 code(
@@ -451,10 +457,11 @@ code(
 md(
     "## One picture worth keeping\n"
     "\n"
-    "`plt.plot` draws the monthly averages as a line. Always label the axes and "
-    "give the plot a title — an unlabelled plot is useless to a reader. "
-    "`plt.savefig` writes it to an image file you could drop straight into a "
-    "paper or a slide.",
+    "Our `monthly_mean` table has two parts: `.index` (the labels — here the "
+    "months) and `.values` (the numbers — the averages). `plt.plot` needs both, "
+    "one for each axis. Always label the axes and give the plot a title — an "
+    "unlabelled plot is useless to a reader. `plt.savefig` writes it to an image "
+    "file you could drop straight into a paper or a slide.",
     section="One picture", minutes=15,
 )
 code(

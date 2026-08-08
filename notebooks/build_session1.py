@@ -4,18 +4,24 @@ Every cell is defined ONCE below, then rendered two ways so the live skeleton
 and the complete version are guaranteed identical in structure (CLAUDE.md
 notebook rule 1):
 
-  notebooks/01_complete.ipynb  full worked version, executed end-to-end
-  notebooks/01_live.ipynb      skeleton: code the instructor types in class is
-                               replaced with `# TYPE THIS TOGETHER: ...`, and
-                               each section carries a `<!-- ~N min -->` pacing
-                               marker.
+  notebooks/01_complete.ipynb  full worked version, executed end-to-end (the
+                               answer key; released to students afterwards)
+  notebooks/01_live.ipynb      what you teach from: an instructor "cockpit"
+                               run-sheet on top, a student "how to follow"
+                               legend, per-cell role markers, and pacing.
 
 Regenerate both:  python3 notebooks/build_session1.py
 
-The complete notebook is executed here with a clean kernel; deliberate-error
-cells are tagged `raises-exception` so their real traceback is captured as
-output instead of halting the run. The Colab-only install cell is tagged
-`skip-execution` so this local build does not pip-install anything.
+Each code cell has a teaching ROLE (gradual release of responsibility):
+
+  ido   "I DO"   — instructor types/runs it, students watch. Setup + long cells.
+  demo  "I DO"   — instructor types it LIVE for drama (the hook). Blank in live.
+  wedo  "WE DO"  — everyone types it now, then checkpoint. The default.
+  youdo "YOU DO" — students change ONE thing in working code (the target skill).
+
+Deliberate-error cells are tagged `raises-exception` so their real traceback is
+captured as output instead of halting the clean-kernel run. The Colab-only
+install cell is tagged `skip-execution` so this local build installs nothing.
 """
 
 from pathlib import Path
@@ -29,8 +35,6 @@ DATA_BASE_URL = (
     "python-crash-course/main/data/session1"
 )
 
-# --- cell helpers ---------------------------------------------------------
-
 CELLS = []
 
 
@@ -38,9 +42,9 @@ def md(src, section=None, minutes=None):
     CELLS.append({"kind": "md", "src": src, "section": section, "minutes": minutes})
 
 
-def code(src, live=True, hint="", raises=False, skip=False):
+def code(src, role="wedo", hint="", youdo="", raises=False, skip=False):
     CELLS.append(
-        {"kind": "code", "src": src, "live": live, "hint": hint,
+        {"kind": "code", "src": src, "role": role, "hint": hint, "youdo": youdo,
          "raises": raises, "skip": skip}
     )
 
@@ -82,7 +86,7 @@ code(
     "# Colab only. Run this first, before we start.\n"
     "!pip install -q pandas==2.2.2 matplotlib==3.9.2\n"
     'print("Libraries ready.")',
-    live=False, skip=True,
+    role="ido", skip=True,
 )
 
 md(
@@ -102,7 +106,7 @@ code(
     'DATA_BASE_URL = "' + DATA_BASE_URL + '"\n'
     "\n"
     'print("pandas version:", pd.__version__)',
-    live=False,
+    role="ido",
 )
 
 # =========================================================================
@@ -125,11 +129,12 @@ code(
     "\n"
     "year = pd.concat(all_months, ignore_index=True)\n"
     'print("Loaded", year.shape[0], "rows from 12 files")',
+    role="demo",
     hint="read all 12 files and stack them into one big table called `year`",
 )
 
 md("Here are the first rows of the whole year in one glance:")
-code("year.head()", hint="peek at the top of the combined table")
+code("year.head()", role="wedo", hint="peek at the top of the combined table")
 
 md(
     "Now count how many rows belong to each treatment. Look closely at the "
@@ -138,6 +143,7 @@ md(
 )
 code(
     'year["treatment"].value_counts()',
+    role="wedo",
     hint="count rows per treatment — notice `Control` appears more than once",
 )
 
@@ -164,7 +170,7 @@ md(
 code(
     "sample_count = 81\n"
     'print("rows in one file:", sample_count)',
-    hint="make a number variable and print it",
+    role="wedo", hint="make a number variable and print it",
 )
 
 md(
@@ -176,7 +182,7 @@ md(
 code(
     'treatment_name = "Control"\n'
     'print(f"the treatment is {treatment_name}")',
-    hint="store text in a variable and print it inside a sentence",
+    role="wedo", hint="store text in a variable and print it inside a sentence",
 )
 
 md(
@@ -187,7 +193,7 @@ code(
     "newest_ph = 7.6\n"
     "if newest_ph > 7.5:\n"
     '    print("this sample is slightly basic")',
-    hint="print a message only if pH is above 7.5",
+    role="wedo", hint="print a message only if pH is above 7.5",
 )
 
 md(
@@ -199,7 +205,7 @@ code(
     "months = [1, 2, 3, 4, 5, 6]\n"
     'print("first month:", months[0])\n'
     'print("how many:", len(months))',
-    hint="make a list, grab the first item, count the items",
+    role="wedo", hint="make a list, grab the first item, count the items",
 )
 
 md(
@@ -210,15 +216,15 @@ md(
     "useful habit today is to **read the last line first**. Here we ask for a "
     "variable name that does not exist:"
 )
-code("print(monthss)", raises=True,
-     hint="ask Python for a variable name we never made")
+code("print(monthss)", role="wedo", raises=True,
+     hint="ask Python for a variable name we never made (a deliberate typo)")
 
 md(
     "Read the traceback from the **bottom up**. The last line says "
     "`NameError: name 'monthss' is not defined`. `NameError` means *I have never "
     "heard of that name*. We simply misspelled `months`. The fix:"
 )
-code("print(months)", hint="spell the variable name correctly")
+code("print(months)", role="wedo", hint="spell the variable name correctly")
 
 # =========================================================================
 # BLOCK 3 — DATA IN
@@ -235,7 +241,7 @@ md(
 code(
     'jan = pd.read_csv(f"{DATA_BASE_URL}/results_2025_01.csv")\n'
     "jan.head()",
-    hint="read January into a DataFrame and show the first rows",
+    role="wedo", hint="read January into a DataFrame and show the first rows",
 )
 
 md(
@@ -243,7 +249,7 @@ md(
     "is the table, and what kind of value is in each column?"
 )
 code('print("rows, columns:", jan.shape)',
-     hint="print the number of rows and columns")
+     role="wedo", hint="print the number of rows and columns")
 
 md(
     "`.dtypes` lists the type of each column. `float64` means decimal numbers, "
@@ -251,23 +257,27 @@ md(
     "— it is a measurement, so we expect a number, but it comes in as `object`. "
     "That is a clue that something non-numeric is hiding in it."
 )
-code("jan.dtypes", hint="show the type of every column")
+code("jan.dtypes", role="ido", hint="show the type of every column")
 
 md(
     "`.describe()` gives quick statistics for the number columns — count, mean, "
     "min, max. Notice `absorbance` is **missing** from this summary: pandas will "
     "not do statistics on a column it thinks is text. We will fix that shortly."
 )
-code("jan.describe()", hint="summary statistics for the numeric columns")
+code("jan.describe()", role="ido", hint="summary statistics for the numeric columns")
 
 md("To look at a single column, name it in square brackets:")
-code('jan["ph"].head()', hint="show just the pH column")
+code('jan["ph"].head()', role="wedo", hint="show just the pH column")
 
 md(
     "For several columns, pass a **list** of names — that is why there are two "
     "sets of brackets: the outer selects, the inner is the list."
 )
-code('jan[["sample_id", "ph"]].head()', hint="show two columns side by side")
+code(
+    'jan[["sample_id", "ph"]].head()',
+    role="youdo",
+    youdo='add a third column name to the list, e.g. "treatment", and rerun.',
+)
 
 md(
     "**Filtering** keeps only the rows that match a condition. The part inside "
@@ -278,7 +288,7 @@ code(
     'high_ph = jan[jan["ph"] > 7.5]\n'
     'print("high-pH rows:", high_ph.shape[0])\n'
     "high_ph.head()",
-    hint="keep only the rows where pH is above 7.5",
+    role="wedo", hint="keep only the rows where pH is above 7.5",
 )
 
 md(
@@ -288,15 +298,15 @@ md(
     "not exactly right. pandas is **case-sensitive** — `ph` and `PH` are "
     "different. Watch:"
 )
-code('jan["PH"].head()', raises=True,
-     hint="ask for a column using the wrong capitalisation")
+code('jan["PH"].head()', role="wedo", raises=True,
+     hint="ask for a column using the wrong capitalisation (on purpose)")
 
 md(
     "Last line: `KeyError: 'PH'`. A `KeyError` means *that column name is not in "
     "the table*. Ninety percent of the time it is a typo or the wrong "
     "capitalisation. The column is `ph`, lower-case:"
 )
-code('jan["ph"].head()', hint="use the exact column name, lower-case")
+code('jan["ph"].head()', role="wedo", hint="use the exact column name, lower-case")
 
 md(
     "Now the cleaning. `absorbance` loaded as text because a few cells contain "
@@ -309,7 +319,7 @@ code(
     'jan["absorbance"] = pd.to_numeric(jan["absorbance"], errors="coerce")\n'
     'print("new type:", jan["absorbance"].dtype)\n'
     'jan["absorbance"].describe()',
-    hint="turn absorbance into real numbers, then summarise it",
+    role="wedo", hint="turn absorbance into real numbers, then summarise it",
 )
 
 md(
@@ -320,7 +330,7 @@ md(
 code(
     'jan["treatment"] = jan["treatment"].str.strip().str.capitalize()\n'
     'jan["treatment"].value_counts()',
-    hint="make every treatment label consistent, then recount",
+    role="wedo", hint="make every treatment label consistent, then recount",
 )
 
 md(
@@ -331,7 +341,7 @@ md(
 code(
     'jan = jan.dropna(how="all")\n'
     'print("rows after cleaning:", jan.shape[0])',
-    hint="drop the fully-empty row and recount",
+    role="wedo", hint="drop the fully-empty row and recount",
 )
 
 # =========================================================================
@@ -357,7 +367,7 @@ code(
     "\n"
     "year = pd.concat(all_months, ignore_index=True)\n"
     'print("total rows:", year.shape[0])',
-    live=False,
+    role="ido",
 )
 
 md(
@@ -369,7 +379,7 @@ code(
     'year["absorbance"] = pd.to_numeric(year["absorbance"], errors="coerce")\n'
     'year["treatment"] = year["treatment"].str.strip().str.capitalize()\n'
     "year.dtypes",
-    live=False,
+    role="ido",
 )
 
 md(
@@ -379,13 +389,14 @@ md(
 )
 code(
     'year.groupby("treatment")["absorbance"].mean()',
-    hint="average absorbance for each treatment",
+    role="wedo", hint="average absorbance for each treatment",
 )
 
 md("Swap `.mean()` for `.count()` to ask how many samples are in each group:")
 code(
     'year.groupby("treatment")["absorbance"].count()',
-    hint="count the samples in each treatment",
+    role="youdo",
+    youdo="you just saw .mean(). Change .count() to .max() and rerun — what does it tell you?",
 )
 
 md(
@@ -395,7 +406,7 @@ md(
 code(
     'monthly_mean = year.groupby("month")["absorbance"].mean()\n'
     "monthly_mean",
-    hint="average absorbance for each month",
+    role="wedo", hint="average absorbance for each month",
 )
 
 # =========================================================================
@@ -417,6 +428,7 @@ code(
     'plt.title("Average absorbance by month, 2025")\n'
     'plt.savefig("absorbance_by_month.png", dpi=150)\n'
     "plt.show()",
+    role="wedo",
     hint="plot the monthly averages with labels, a title, and save it",
 )
 
@@ -430,7 +442,8 @@ code(
     'plt.ylabel("Mean absorbance")\n'
     'plt.title("Absorbance by treatment")\n'
     "plt.show()",
-    hint="draw a bar chart comparing the two treatments",
+    role="youdo",
+    youdo='change the title, or change "treatment" to "month" to plot the monthly trend as bars.',
 )
 
 # =========================================================================
@@ -459,7 +472,113 @@ md(
 )
 
 
+# --- instructor cockpit + student legend (live notebook only) -------------
+
+COCKPIT = (
+    "# \U0001F39B️ Instructor cockpit — READ BEFORE CLASS, then collapse / scroll past\n"
+    "\n"
+    "*This cell is for you, not the students. Collapse it (click the arrow) or "
+    "scroll past it before you project the screen.*\n"
+    "\n"
+    "## The one job\n"
+    "Reduce fear and build “I can run and change code” confidence — **not** "
+    "“write from scratch.” When you fall behind, cut *content*, never the "
+    "error-reading or the students’ own typing time.\n"
+    "\n"
+    "## Cell roles (printed as a comment at the top of every code cell)\n"
+    "- **`# I DO`** — you type or run it, students **watch**. Setup and long "
+    "cells. Move fast, narrate.\n"
+    "- **`# WE DO`** — **everyone types it now.** Say “type this,” then go "
+    "quiet ~90 seconds. Checkpoint before moving on.\n"
+    "- **`# YOU DO`** — students **change one thing** in working code. This is "
+    "the real target skill; fast finishers try more variations.\n"
+    "\n"
+    "## Say this out loud in the first 5 minutes\n"
+    "> “If you ever fall behind typing, open **01_complete** (the answer "
+    "notebook), run down to where we are, and rejoin. That is allowed and "
+    "encouraged. Nobody gets stuck.”\n"
+    "\n"
+    "## Timing — markers are in the notebook, total 90 min\n"
+    "\n"
+    "| Section | Min | If you’re behind, cut… |\n"
+    "|---|---|---|\n"
+    "| The hook | 10 | nothing — this sells the whole course |\n"
+    "| Notebook mechanics | 15 | the list cell; keep **both** break-it cells |\n"
+    "| Getting data in | 25 | the two-column select (YOU DO) |\n"
+    "| All 12 files | 20 | already an I DO — just run it, don’t linger |\n"
+    "| One picture | 15 | the bar chart (YOU DO); keep the line plot |\n"
+    "| Your turn | 5 | never — this is the homework handoff |\n"
+    "\n"
+    "## Room mechanics\n"
+    "- **Checkpoint, don’t wait per cell.** Run 2–3 `I DO` cells, then pause "
+    "on a `WE DO`.\n"
+    "- **“Thumbs up when your cell ran”** — read the room in 3 seconds "
+    "instead of asking aloud.\n"
+    "- **Pair fast + slow**; one types, one reads the code aloud and checks the "
+    "output. Swap each section.\n"
+    "- **Recruit 2 fast finishers as floating helpers** after the first 30 min.\n"
+    "- **Break-it-on-purpose cells: slow down.** Trigger the error, let it sit, "
+    "read the **last line first**, out loud.\n"
+    "\n"
+    "## Pre-class checklist (do before the room fills)\n"
+    "- [ ] Ran through this live notebook once, out loud, with a timer\n"
+    "- [ ] Opened the data URL on classroom Wi-Fi **and** a phone hotspot\n"
+    "- [ ] Offline zip of notebook + data on a USB stick as backup\n"
+    "- [ ] `01_complete` open in a second tab as your answer key\n"
+    "- [ ] Two bonus prompts ready for whoever finishes early\n"
+    "\n"
+    "## Dialing the typing load\n"
+    "Default split is about **two-thirds WE DO** (type), **10% YOU DO** "
+    "(modify), the rest **I DO** (watch). To change it, edit the `role=` on a "
+    "cell in "
+    "`build_session1.py` and rerun it:\n"
+    "- More confident typing live? Turn some `I DO` into `WE DO`.\n"
+    "- Want them typing less? Turn some `WE DO` into `I DO` or `YOU DO`."
+)
+
+STUDENT_LEGEND = (
+    "## How to follow along\n"
+    "\n"
+    "Every code cell starts with a comment telling you what to do:\n"
+    "\n"
+    "- **`# I DO`** — just watch; I’ll type or run it.\n"
+    "- **`# WE DO`** — everyone type it now, then run it (**Shift + Enter**).\n"
+    "- **`# YOU DO`** — change the one thing I point to, then run it.\n"
+    "\n"
+    "Fallen behind? Open **01_complete**, run down to where we are, and rejoin — "
+    "that is completely fine."
+)
+
+
 # --- rendering ------------------------------------------------------------
+
+def _tags(c):
+    tags = []
+    if c["raises"]:
+        tags.append("raises-exception")
+    if c["skip"]:
+        tags.append("skip-execution")
+    return {"tags": tags} if tags else {}
+
+
+def render_complete_code(c):
+    return nbformat.v4.new_code_cell(c["src"], metadata=_tags(c))
+
+
+def render_live_code(c):
+    role = c["role"]
+    if role == "wedo":
+        src = "# WE DO — everyone type this now:\n# " + c["hint"]
+    elif role == "demo":
+        src = "# I DO — watch me type this live:\n# " + c["hint"]
+    elif role == "ido":
+        src = "# I DO — I'll run this, just watch:\n" + c["src"]
+    elif role == "youdo":
+        src = "# YOU DO — change one thing: " + c["youdo"] + "\n" + c["src"]
+    else:
+        src = c["src"]
+    return nbformat.v4.new_code_cell(src, metadata=_tags(c))
+
 
 def build_complete():
     nb = nbformat.v4.new_notebook()
@@ -468,48 +587,36 @@ def build_complete():
         if c["kind"] == "md":
             cells.append(nbformat.v4.new_markdown_cell(c["src"]))
         else:
-            tags = []
-            if c["raises"]:
-                tags.append("raises-exception")
-            if c["skip"]:
-                tags.append("skip-execution")
-            meta = {"tags": tags} if tags else {}
-            cells.append(nbformat.v4.new_code_cell(c["src"], metadata=meta))
+            cells.append(render_complete_code(c))
     nb.cells = cells
     nb.metadata["language_info"] = {"name": "python"}
     return nb
 
 
 def build_live():
-    nb = nbformat.v4.new_notebook()
-    cells = []
+    rendered = []
     for c in CELLS:
         if c["kind"] == "md":
             src = c["src"]
             if c["minutes"] is not None:
                 src = f"<!-- ~{c['minutes']} min -->\n\n" + src
-            cells.append(nbformat.v4.new_markdown_cell(src))
+            rendered.append(nbformat.v4.new_markdown_cell(src))
         else:
-            tags = []
-            if c["raises"]:
-                tags.append("raises-exception")
-            if c["skip"]:
-                tags.append("skip-execution")
-            meta = {"tags": tags} if tags else {}
-            if c["live"]:
-                src = "# TYPE THIS TOGETHER: " + c["hint"]
-            else:
-                src = c["src"]
-            cells.append(nbformat.v4.new_code_cell(src, metadata=meta))
-    nb.cells = cells
+            rendered.append(render_live_code(c))
+
+    nb = nbformat.v4.new_notebook()
+    # cockpit first, then the welcome cell, then the student legend, then the rest
+    nb.cells = (
+        [nbformat.v4.new_markdown_cell(COCKPIT), rendered[0],
+         nbformat.v4.new_markdown_cell(STUDENT_LEGEND)]
+        + rendered[1:]
+    )
     nb.metadata["language_info"] = {"name": "python"}
     return nb
 
 
 def main():
     complete = build_complete()
-    # Execute with a clean kernel; run from /tmp so the saved PNG does not
-    # land in the repo. Deliberate-error cells are tagged raises-exception.
     client = NotebookClient(
         complete, timeout=120, kernel_name="python3",
         resources={"metadata": {"path": "/tmp"}},
@@ -517,16 +624,17 @@ def main():
     client.execute()
     nbformat.write(complete, HERE / "01_complete.ipynb")
 
-    live = build_live()
-    nbformat.write(live, HERE / "01_live.ipynb")
+    nbformat.write(build_live(), HERE / "01_live.ipynb")
 
-    n_code = sum(1 for c in CELLS if c["kind"] == "code")
-    n_live = sum(1 for c in CELLS if c["kind"] == "code" and c["live"])
+    code_cells = [c for c in CELLS if c["kind"] == "code"]
+    n = len(code_cells)
+    counts = {r: sum(1 for c in code_cells if c["role"] == r)
+              for r in ("ido", "demo", "wedo", "youdo")}
     total_min = sum(c["minutes"] for c in CELLS if c.get("minutes"))
-    print(f"cells: {len(CELLS)} total, {n_code} code, "
-          f"{len(CELLS) - n_code} markdown")
-    print(f"typed-live code cells: {n_live}/{n_code} "
-          f"({round(100 * n_live / n_code)}%)")
+    print(f"cells: {len(CELLS)} total, {n} code, {len(CELLS) - n} markdown")
+    print(f"roles: WE DO {counts['wedo']} ({round(100*counts['wedo']/n)}%) | "
+          f"YOU DO {counts['youdo']} | I DO {counts['ido'] + counts['demo']} "
+          f"(incl. {counts['demo']} live-typed hook)")
     print(f"pacing markers sum to: {total_min} min")
 
 

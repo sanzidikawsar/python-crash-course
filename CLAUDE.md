@@ -96,7 +96,9 @@ CLAUDE.md                  this file
 BUILD_PLAN.md              ordered build tasks with ready-to-paste prompts
 docs/course-design.md      full pedagogical brief — read before authoring
 data/generate_demo_data.py reproducible demo data generator (seeded)
+data/generate_genomics_data.py synthetic plant-gene FASTA generator (seeded)
 data/session1/             12 messy monthly CSVs, produced by the generator
+data/genomics/             plant_genes.fasta for the session-1 Part-4 taste
 data/session2/md/          MD track sample inputs
 data/session2/genomics/    genomics track sample inputs
 notebooks/                 NN_live.ipynb and NN_complete.ipynb per session

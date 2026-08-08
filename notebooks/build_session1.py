@@ -38,6 +38,10 @@ DATA_BASE_URL = (
     "https://raw.githubusercontent.com/sanzidikawsar/"
     "python-crash-course/main/data/session1"
 )
+GENOMICS_FASTA_URL = (
+    "https://raw.githubusercontent.com/sanzidikawsar/"
+    "python-crash-course/main/data/genomics/plant_genes.fasta"
+)
 
 CELLS = []
 
@@ -466,15 +470,15 @@ code(
 md(
     "# Part 4 · A taste of your field's tool\n"
     "\n"
-    "Everything today had the same shape: **open something → loop over its "
-    "records → get one number each → collect into a table → summarise or plot.** "
-    "Your research tools follow the *exact same shape* — only the opener "
-    "changes. Here is a tiny taste. **Run the cell for your own field.** Next "
-    "session we go hands-on.",
-    section="Part 4 · A taste of your field's tool", minutes=15,
+    "Everything today had one shape: **open something → loop over its records → "
+    "get one number each → collect into a table → summarise or plot.** Your "
+    "research tools follow the *exact same shape* — only the opener changes. "
+    "**Run the cells for your own field** (watching the other track is fine too). "
+    "Next session we go hands-on.",
+    section="Part 4 · A taste of your field's tool", minutes=20,
 )
 code(
-    "# Colab only. Installs your field libraries (this one is a bit slower).\n"
+    "# Colab only. Installs your field libraries (MDAnalysis takes a minute).\n"
     "!pip install -q biopython MDAnalysis MDAnalysisTests\n"
     'print("Field libraries ready.")',
     role="ido", skip=True,
@@ -482,40 +486,120 @@ code(
 code(
     "import warnings\n"
     'warnings.filterwarnings("ignore")\n'
-    "from Bio.Seq import Seq\n"
+    "import urllib.request\n"
+    "from Bio import SeqIO\n"
     "from Bio.SeqUtils import gc_fraction\n"
     "import MDAnalysis as mda\n"
     "from MDAnalysis.tests.datafiles import PSF, DCD\n"
-    'print("imported")',
+    'print("field tools loaded")',
     role="run", hint="load both field tools",
 )
 
 md(
-    "**Genomics** — read three DNA sequences and get one number each (their GC "
-    "content). Same shape as absorbance-per-file: *loop → one number each*:"
+    "## Genomics · Biopython\n"
+    "\n"
+    "Sequences live in **FASTA** files. We download a small file of plant genes "
+    "and loop over its records — *open → loop → one number each*, exactly like "
+    "looping over the twelve CSV files earlier:"
 )
 code(
-    'sequences = ["ATATATATATATATAT", "ATGCATGCATGCATGC", "GCGCGCGCGCGCGCGC"]\n'
-    "for dna in sequences:\n"
-    '    print("GC%:", round(gc_fraction(Seq(dna)) * 100, 1))',
-    role="run", hint="genomics — GC content of each sequence",
+    'url = "' + GENOMICS_FASTA_URL + '"\n'
+    'urllib.request.urlretrieve(url, "plant_genes.fasta")\n'
+    'for gene in SeqIO.parse("plant_genes.fasta", "fasta"):\n'
+    '    print(gene.id, "| length:", len(gene.seq), "| GC%:", round(gc_fraction(gene.seq) * 100, 1))',
+    role="run", hint="genomics — read the FASTA, GC% of each gene",
 )
 
 md(
-    "**Molecular dynamics** — open a small simulation and get one number per "
-    "frame (the protein's size). Same shape again: *loop over frames → one "
-    "number each → collect into a list*:"
+    "**The central dogma, in three lines.** A gene is DNA; it is transcribed to "
+    "RNA, then translated to a protein. Biopython does each step with one call — "
+    "your gene becomes the actual protein letters:"
 )
 code(
-    "import warnings\n"
+    'first_gene = next(SeqIO.parse("plant_genes.fasta", "fasta"))\n'
+    'print("DNA    :", first_gene.seq[:30], "...")\n'
+    'print("RNA    :", first_gene.seq.transcribe()[:30], "...")\n'
+    'print("protein:", first_gene.seq.translate(to_stop=True))',
+    role="run", hint="genomics — turn a gene into its protein",
+)
+
+md(
+    "**The other strand.** DNA is double-stranded; the *reverse complement* is "
+    "the partner strand, read the other way:"
+)
+code(
+    "piece = first_gene.seq[:12]\n"
+    'print("strand 1:", piece)\n'
+    'print("strand 2:", piece.reverse_complement())',
+    role="run", hint="genomics — the complementary strand",
+)
+
+md(
+    "**One picture.** Collect every gene's GC% and bar-chart it — you can *see* "
+    "that monocots (rice, maize, sorghum) run GC-richer than dicots "
+    "(Arabidopsis, soybean, tomato). Same plotting as Part 3:"
+)
+code(
+    "ids = []\n"
+    "gc = []\n"
+    'for gene in SeqIO.parse("plant_genes.fasta", "fasta"):\n'
+    "    ids.append(gene.id)\n"
+    "    gc.append(round(gc_fraction(gene.seq) * 100, 1))\n"
+    "plt.bar(ids, gc)\n"
+    'plt.title("GC % per plant gene")\n'
+    "plt.show()",
+    role="run", hint="genomics — bar chart of GC% per gene",
+)
+
+md(
+    "## Molecular dynamics · MDAnalysis\n"
+    "\n"
+    "A molecular-dynamics run is a movie of a protein wobbling: many **frames**, "
+    "each holding the 3-D positions of every atom. First, what is inside it:"
+)
+code(
     'warnings.filterwarnings("ignore")\n'
     "universe = mda.Universe(PSF, DCD)\n"
+    'print("atoms:", len(universe.atoms))\n'
+    'print("residues:", len(universe.residues))\n'
+    'print("frames:", len(universe.trajectory))',
+    role="run", hint="MD — what is in the simulation",
+)
+
+md(
+    "**One number per frame.** The *radius of gyration* measures how compact the "
+    "protein is. We loop over frames and collect it — the same *open → loop → "
+    "one number each* shape as GC-per-gene:"
+)
+code(
     'protein = universe.select_atoms("protein")\n'
     "sizes = []\n"
     "for frame in universe.trajectory:\n"
     "    sizes.append(round(float(protein.radius_of_gyration()), 2))\n"
-    'print("measured", len(sizes), "frames; first 5 sizes:", sizes[:5])',
-    role="run", hint="molecular dynamics — protein size per frame",
+    'print("first 5 of", len(sizes), "frames:", sizes[:5])',
+    role="run", hint="MD — protein size per frame",
+)
+
+md("**One picture.** Plot the protein's size across the whole simulation:")
+code(
+    'plt.plot(sizes, marker="o")\n'
+    'plt.xlabel("Frame")\n'
+    'plt.ylabel("Radius of gyration")\n'
+    'plt.title("Protein size over the simulation")\n'
+    "plt.show()",
+    role="run", hint="MD — plot protein size over time",
+)
+
+md(
+    "**How far did it move?** RMSD compares every frame back to the first and "
+    "reports, in one number, how much the protein moved during the run:"
+)
+code(
+    "from MDAnalysis.analysis import rms\n"
+    'result = rms.RMSD(universe, select="protein").run()\n'
+    "moved = result.results.rmsd[:, 2]\n"
+    'print("protein moved", round(float(moved[-1]), 2), "Angstrom start to end")',
+    role="run", hint="MD — total movement (RMSD)",
 )
 
 # =========================================================================
@@ -540,7 +624,7 @@ md(
     "\n"
     "Bring the notebook — working or broken — next session. A broken cell with "
     "its error message is exactly what we want to look at together.",
-    section="Wrap up", minutes=10,
+    section="Wrap up", minutes=5,
 )
 
 
@@ -576,8 +660,8 @@ COCKPIT = (
     "| 1 · Python basics | 15 | nothing — this is the foundation |\n"
     "| 2 · Your first real file | 25 | the two-column select (YOU DO) |\n"
     "| 3 · All the files at once | 25 | the bar chart (YOU DO); keep the line plot |\n"
-    "| 4 · A taste of your field's tool | 15 | run only your own track's cell |\n"
-    "| Wrap up | 10 | never — this is the homework handoff |\n"
+    "| 4 · A taste of your field's tool | 20 | run only your own track's cell; skip the bar-chart / RMSD extras |\n"
+    "| Wrap up | 5 | never — this is the homework handoff |\n"
     "\n"
     "## Room mechanics\n"
     "- **Checkpoint, don't wait per cell.** Run 2–3 cells, then pause on a "
@@ -619,6 +703,16 @@ COCKPIT = (
     "divide by length.\n"
     "- **Biopython** (`Bio`) — the standard Python library for biological "
     "sequences (reading FASTA files, computing sequence properties).\n"
+    "- **FASTA** — the standard text format for sequences: a `>` header line, "
+    "then the letters. `SeqIO.parse` loops over its records.\n"
+    "- **Central dogma**: DNA → (transcribe) → RNA → (translate) → protein. "
+    "`.transcribe()` swaps T for U; `.translate()` reads codons (letter triples) "
+    "into amino acids. That protein string is the real gene product.\n"
+    "- **Reverse complement** — the partner DNA strand (A↔T, G↔C, reversed); "
+    "`.reverse_complement()`.\n"
+    "- **Monocots vs dicots** — two big plant groups (rice/maize/sorghum vs "
+    "Arabidopsis/soybean/tomato). Monocot genes really do run GC-richer — the "
+    "bar chart shows it.\n"
     "\n"
     "**Part 4 — Molecular dynamics (MDAnalysis):**\n"
     "- **Molecular dynamics (MD)** — a physics simulation of how a molecule (here "
@@ -631,6 +725,11 @@ COCKPIT = (
     "trajectories and measure things. **PSF/DCD** are file formats (PSF = which "
     "atoms exist, DCD = their positions per frame); the sample files ship with "
     "the library.\n"
+    "- **Residue** — one amino-acid unit of the protein chain; the sample has "
+    "214.\n"
+    "- **RMSD** (root-mean-square deviation) — one number for how far the protein "
+    "moved from the first frame; the classic MD “how much did it change?” "
+    "metric.\n"
     "\n"
     "**Why the two tracks are one lesson:** open → loop over records → one number "
     "each → collect into a table → summarise/plot. Absorbance-per-file, "

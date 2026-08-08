@@ -134,8 +134,8 @@ future group is more confident, restore a 30-second run-only teaser on top.)
 | 0–15 | **Part 1 · Python basics** | `print`, variable, string ops (`.strip`/`.capitalize`), one `if`, list + `.append`, one `for` — all on everyday values (fruit, temperature, a name). First **break-it-on-purpose** here. |
 | 15–40 | **Part 2 · Your first real file** | A taste of lab data (a list of readings, a messy label), then one CSV: `read_csv`, DataFrame, `.head/.shape/.dtypes/.describe`, select, filter, second **break-it**, the three one-line cleanings (reusing Part 1's string ops). |
 | 40–65 | **Part 3 · All the files at once** | The 3-step loop build (3 files → month list → full combine), `groupby`, one line plot + save, one bar chart. The old "hook", now earned. |
-| 65–80 | **Part 4 · A taste of your field's tool** | Same five-step skeleton in Biopython (GC per sequence) and MDAnalysis (radius per frame). Run-only confidence taste; hands-on deferred to session 2. |
-| 80–90 | **Wrap up** | Recap + HW1 handed out. |
+| 65–85 | **Part 4 · A taste of your field's tool** | Same five-step skeleton, richer: Biopython (read FASTA, GC%, central dogma → protein, reverse complement, GC bar chart) and MDAnalysis (atoms/residues/frames, radius of gyration + plot, RMSD). Run-only; hands-on in session 2. |
+| 85–90 | **Wrap up** | Recap + HW1 handed out. |
 
 Concepts permitted: variable, string, string methods, number, list, `.append`,
 `len`, `max`, one `if`, one `for`, DataFrame, column, filter, `groupby`, one

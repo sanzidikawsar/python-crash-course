@@ -113,7 +113,7 @@ code(
 # BLOCK 1 — THE HOOK
 # =========================================================================
 md(
-    "## The 30-minute Excel job, in six lines\n"
+    "## The 30-minute Excel job, in a few lines\n"
     "\n"
     "We have twelve files, one per month, named `results_2025_01.csv` up to "
     "`results_2025_12.csv`. In Excel you would open each, copy, paste, and pray. "
@@ -122,15 +122,16 @@ md(
     section="The hook", minutes=10,
 )
 code(
+    'months = ["01", "02", "03", "04", "05", "06",\n'
+    '          "07", "08", "09", "10", "11", "12"]\n'
     "all_months = []\n"
-    "for month in range(1, 13):\n"
-    '    file_url = f"{DATA_BASE_URL}/results_2025_{month:02d}.csv"\n'
+    "for month in months:\n"
+    '    file_url = f"{DATA_BASE_URL}/results_2025_{month}.csv"\n'
     "    all_months.append(pd.read_csv(file_url))\n"
-    "\n"
     "year = pd.concat(all_months, ignore_index=True)\n"
     'print("Loaded", year.shape[0], "rows from 12 files")',
     role="demo",
-    hint="read all 12 files and stack them into one big table called `year`",
+    hint="list the 12 months, read each file, stack them into one table `year`",
 )
 
 md("Here are the first rows of the whole year in one glance:")
@@ -202,10 +203,22 @@ md(
     "`[0]`. `len(...)` tells you how many items there are."
 )
 code(
-    "months = [1, 2, 3, 4, 5, 6]\n"
-    'print("first month:", months[0])\n'
-    'print("how many:", len(months))',
+    "plate_wells = [1, 2, 3, 4, 5, 6]\n"
+    'print("first well:", plate_wells[0])\n'
+    'print("how many:", len(plate_wells))',
     role="wedo", hint="make a list, grab the first item, count the items",
+)
+
+md(
+    "Lists can grow. `.append(...)` adds one item to the end. This is exactly "
+    "the trick we use to collect twelve files into one list:"
+)
+code(
+    "collected = []\n"
+    'collected.append("first")\n'
+    'collected.append("second")\n'
+    "print(collected)",
+    role="wedo", hint="start an empty list and add two items to it",
 )
 
 md(
@@ -216,15 +229,15 @@ md(
     "useful habit today is to **read the last line first**. Here we ask for a "
     "variable name that does not exist:"
 )
-code("print(monthss)", role="wedo", raises=True,
+code("print(plate_wellss)", role="wedo", raises=True,
      hint="ask Python for a variable name we never made (a deliberate typo)")
 
 md(
     "Read the traceback from the **bottom up**. The last line says "
-    "`NameError: name 'monthss' is not defined`. `NameError` means *I have never "
-    "heard of that name*. We simply misspelled `months`. The fix:"
+    "`NameError: name 'plate_wellss' is not defined`. `NameError` means *I have "
+    "never heard of that name*. We simply misspelled `plate_wells`. The fix:"
 )
-code("print(months)", role="wedo", hint="spell the variable name correctly")
+code("print(plate_wells)", role="wedo", hint="spell the variable name correctly")
 
 # =========================================================================
 # BLOCK 3 — DATA IN
@@ -350,21 +363,44 @@ code(
 md(
     "## Doing it for all twelve files\n"
     "\n"
-    "A **`for` loop** repeats the same steps for each item in a list. `range(1, "
-    "13)` gives the numbers 1 through 12. Each time around we build that month's "
-    "file name, read it, tag it with its month number, and add it to a growing "
-    "list. At the end, `pd.concat` stacks them into one table. This is the loop "
-    "from the hook — now you know every line.",
+    "A **`for` loop** repeats the same steps once for each item in a list — no "
+    "copy-paste. We build up to all twelve files in three small steps, so "
+    "nothing stays a mystery.",
     section="Doing it for all twelve files", minutes=20,
+)
+md(
+    "**Step 1** — watch the loop run on just three files. It prints one line "
+    "each time it goes around, so you can *see* it repeat three times:"
+)
+code(
+    'for month in ["01", "02", "03"]:\n'
+    '    file_url = f"{DATA_BASE_URL}/results_2025_{month}.csv"\n'
+    "    one_month = pd.read_csv(file_url)\n"
+    '    print("month", month, "->", one_month.shape)',
+    role="wedo", hint="loop over three files and print the size of each",
+)
+md(
+    "**Step 2** — here are all twelve month labels in one list. We will loop "
+    "over this instead of just three:"
+)
+code(
+    'months = ["01", "02", "03", "04", "05", "06",\n'
+    '          "07", "08", "09", "10", "11", "12"]\n'
+    'print("we have", len(months), "months")',
+    role="wedo", hint="make the list of twelve month labels",
+)
+md(
+    "**Step 3** — the full run. Same loop, but now we also **tag** each file "
+    "with its month and **append** it to the list, then `pd.concat` stacks all "
+    "twelve into one table. This is the hook — and now you know every line:"
 )
 code(
     "all_months = []\n"
-    "for month in range(1, 13):\n"
-    '    file_url = f"{DATA_BASE_URL}/results_2025_{month:02d}.csv"\n'
+    "for month in months:\n"
+    '    file_url = f"{DATA_BASE_URL}/results_2025_{month}.csv"\n'
     "    monthly = pd.read_csv(file_url)\n"
     '    monthly["month"] = month\n'
     "    all_months.append(monthly)\n"
-    "\n"
     "year = pd.concat(all_months, ignore_index=True)\n"
     'print("total rows:", year.shape[0])',
     role="ido",

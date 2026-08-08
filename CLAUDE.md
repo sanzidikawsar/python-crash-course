@@ -102,6 +102,18 @@ handouts/                  error cheatsheet, AI prompting guide, SLURM template
 setup/                     WSL2, Miniforge, and install-verification guides
 ```
 
+## DATA_BASE_URL
+
+Session-1 demo data is hosted (public) for raw fetch in Colab:
+
+```
+https://raw.githubusercontent.com/sanzidikawsar/python-crash-course/main/data/session1
+```
+
+Notebooks define this once at the top and build file URLs from it, e.g.
+`f"{DATA_BASE_URL}/results_2025_{month:02d}.csv"`. Regenerate the files with
+`python3 data/generate_demo_data.py` and `git push`; the URL does not change.
+
 ## Environment decisions (rationale in docs/course-design.md)
 
 - **Session 1: Google Colab.** Zero install, identical environment on every
